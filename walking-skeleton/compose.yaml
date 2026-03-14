@@ -37,3 +37,12 @@ services:
     volumes:
       - ./database-migrations:/flyway/db/migration
     command: -connectRetries=60 -baselineOnMigrate=true migrate
+
+  e2e-tests:
+    entrypoint: "/bin/true"
+    build: e2e-tests
+    network_mode: host
+    depends_on:
+      - client
+    volumes:
+      - ./e2e-tests/tests:/app/tests
