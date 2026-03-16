@@ -1,8 +1,21 @@
-let communityState = $state([
+import { browser } from "$app/environment";
+
+const COMMUNITIES_KEY = "communities";
+let initialCommunities = [];
+if (browser && localStorage.getItem(COMMUNITIES_KEY) != null){
+    initialCommunities = JSON.parse(localStorage.getItem(COMMUNITIES_KEY));
+};
+let communityState = $state(initialCommunities);
+
+const saveCommunities = () => {
+    localStorage.setItem(COMMUNITIES_KEY, JSON.stringify(communityState));
+};
+
+/*let communityState = $state([
   { id: 1, name: 'Developers Hub', description: 'A place for developers' },
   { id: 2, name: 'Design Factory', description: 'Creative minds meet here' },
   { id: 3, name: 'Startup Workshop', description: 'Where ideas become reality' }
-]);
+]);*/
 
 const useCommunityState = () => {
     return {
@@ -13,10 +26,12 @@ const useCommunityState = () => {
            return communityState.find((c) => c.id === id);
         },
         addCommunity: (name, description) => {
-            communityState.push({id: communityState.length +1, name: name, description: description})
+            communityState.push({id: communityState.length +1, name: name, description: description});
+            saveCommunities();
         },
         removeCommunity: (id) => {
             communityState = communityState.filter((c) => c.id !== id);
+            saveCommunities();
         }
     };
 };
