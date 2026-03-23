@@ -62,18 +62,93 @@ app.delete("/restaurants/:restaurantId/reviews/:reviewId", (c) => {
 });*/
 
 // CUSTOM MIDDLEWARE
-const myLogger = async (c, next) => {
+/*const myLogger = async (c, next) => {
     console.log(`--> ${c.req.method}   ${c.req.path}`);
     await next();
     console.log(`<-- ${c.req.status}`);
 };
 
-//app.use(myLogger);
-//app.use(logger());
+app.use(myLogger);
+app.use(logger());
 app.use("/api", logger());
 
-app.get("/", (c) => c.text("Hellow world!"));
+app.get("/", (c) => c.text("Hellow world!"));*/
 
+// JSON data
+/*app.get("/", (c) => {
+    const data = { message: "Hello world"};
+    return c.json(data);
+},
+);*/
 
+// return path variables in json
+/*app.get("/lists/:listId/items/:itemId", (c) => {
+    const listId = c.req.param("listId");
+    const itemId = c.req.param("itemId");
+
+    return c.json({ listId, itemId});
+},
+);*/
+
+// request JSON data [ curl -X POST -H "Content-Type: application/json" -d '{"message":"hello"}' "http://localhost:8000"]
+/*app.post("/", async (c) => {
+    const data = await c.req.json();
+    const message = data.message ?? "No message";
+    return c.json({message});
+},
+);*/
+
+/*app.post("/echo", async (c) => {
+    const data = await c.req.json();
+    return c.json(data);
+});
+app.post("/data", async (c) => {
+    const request = await c.req.json();
+    const data = request.data ?? "No data";
+    return c.json({data});
+});
+app.post("/filter/:property", async (c) => {
+    const property = c.req.param("property");
+    const request = await c.req.json();
+    const data = {[property]: request[property]} ?? {};
+    return c.json(data);
+});*/
+
+// API
+/*let temperature = 20;
+app.get("/api/temperature", (c) => {
+    return c.json({temperature});
+});
+app.post("/api/temperature", (c) => {
+    temperature++;
+    return c.json({temperature});
+    
+});
+app.delete("/api/temperature", (c)=> {
+    temperature--;
+    return c.json({temperature});
+});
+// curl -X PUT -H "Content-Type:application/json" -d '{"temperature":30}' "http://localhost:8000/api/temperature"
+app.put("/api/temperature", async (c) => {
+    const data = await c.req.json();
+    temperature = data.temperature;
+    return c.json({temperature});
+});*/
+
+let cards = [];
+
+app.get("/api/cards", (c) => {
+    return c.json({cards});
+});
+app.post("/api/cards", async (c) => {
+    const card = await c.req.json();
+    cards.push(card);
+    return c.json({cards});
+});
+app.delete("/api/cards/:id",  (c) => {
+    const id = c.req.param("id");
+    cards = cards.filter((card) => card.id !== id);
+    return c.json({cards});
+});
 
 export default app;
