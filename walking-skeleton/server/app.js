@@ -1,19 +1,19 @@
 import { Hono } from "@hono/hono";
 import { cors } from "@hono/hono/cors";
 import { logger } from "@hono/hono/logger";
-import postgres from "postgres";
+import * as bookRepository from "./bookRepository.js";
+
 
 const app = new Hono();
 app.use("/*", cors());
 app.use("/*", logger());
 
 
-// create instance of database client
-const sql = postgres();
+
 
 //SQL client commands
 app.get("/api/books", async (c) => {
-    const books = await sql `SELECT * FROM books`;
+    const books = await bookRepository.readAll();
     return c.json(books);
 });
 
@@ -22,11 +22,12 @@ app.get("/api/books/:bookId", async (c) => {
     if (!Number.isInteger(id)){
         return c.json({error: "Invalid book id"}, 400);
     };
-    const result = await sql`SELECT * FROM books WHERE id = ${id}`;
-    if (result.length === 0) {
+    const book = await bookRepository.readOne(id);
+
+    if (!book) {
         return c.json({error : "Book not found"}, 404);
     };
-    return c.json(result[0]);
+    return c.json(book);
 });
 
 app.post("/api/books", async (c) => {
@@ -34,10 +35,8 @@ app.post("/api/books", async (c) => {
     if (!book.title || !book.description || !book.published_at || !book.page_count){
         return c.json({error: "Missing required fields"}, 400);
     };
-    const result = await sql`INSERT INTO books (title, description, published_at, page_count) VALUES (
-    ${book.title}, ${book.description}, ${book.published_at}, ${book.page_count}) RETURNING *;`;
-
-    return c.json(result[0], 201);
+    const newBook = await bookRepository.create(book);
+    return c.json(newBook, 201);
 });
 
 
@@ -46,11 +45,12 @@ app.delete("/api/books/:bookId", async (c) => {
     if (!Number.isInteger(id)){
         return c.json({error: "Invalid book id "}, 400);
     };
-    const result = await sql`DELETE FROM books WHERE id = ${id} RETURNING *;`;
-    if (result.length === 0) {
+    const deletedBook = await bookRepository.deleteOne(id);
+
+    if (!deletedBook) {
         return c.json({error: "NO book found"}, 404);
     };
-    return c.json(result[0]); 
+    return c.json(deletedBook); 
 });
 
 app.put("/api/books/:bookId", async (c) => {
@@ -62,45 +62,33 @@ app.put("/api/books/:bookId", async (c) => {
     if (!book.title || !book.description || !book.published_at || !book.page_count){
         return c.json({error: "MIssing required fields"} , 404);
     };
-    const result = await sql `UPDATE books SET title=${book.title}, description=${book.description}, published_at=${book.published_at}, page_count=${book.page_count} WHERE id = ${id} RETURNING *;`;
-    if (result.length === 0) {
+    const updatedBook = await bookRepository.update(id, book);
+
+    if (!updatedBook) {
         return c.json({error: "Book not found"}, 404);
     };
-    return c.json(result[0]);
+    return c.json(updatedBook);
 });
 
-app.get("/api/todos", async (c) => {
-    const todos = await sql`SELECT * FROM todos`;
-    return c.json(todos);
+app.get("/api/todos", async(c) => {
+    return await todoController.readAll(c);
 });
 
+app.get("/api/todos/:todoId", async (c) => {
+    return await todoController.readOne(c);
+});
 
 app.post("/api/todos", async (c) => {
-    const todo = await c.req.json();
-    if (!todo.name){
-        return c.json({error: "Missing required fields"}, 400);
-    };
-    const createdAt = new Date().toISOString();
-    const result = await sql`INSERT INTO todos (name, created_at) VALUES (${todo.name}, ${createdAt}) RETURNING *;`;
-    return c.json(result[0], 201);
+    return await todoController.create(c);
 });
-
 app.put("/api/todos/:todoId", async (c) => {
-    const id = Number(c.req.param("todoId"));
-    if (!Number.isInteger(id)){
-        return c.json({error: "Invalid todo id"}, 400);
-    };
-    const todo = await c.req.json();
-
-    if (!todo.name || !todo.created_at){
-        return c.json({error: "Missing required fields"}, 400);
-    };
-    const result = await sql`UPDATE todos SET name=${todo.name}, created_at=${todo.created_at} WHERE id = ${id} RETURNING *;`;
-    if (result.length === 0) {
-        return c.json({error: "Todo not found"}, 404);
-    };
-    return c.json(result[0], 200);
+    return await todoController.update(c);
 });
+app.delete("/api/todos/:todoId", async (c) => {
+   return await todoController.deleteOne(c);
+});
+
+
 
 
 
