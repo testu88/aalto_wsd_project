@@ -1,15 +1,9 @@
 import { browser } from "$app/environment";
+import { myFetch } from "$lib/apis/myFetch";
+import * as postsApi from "$lib/apis/postsApi.js";
 
-const POSTS_KEY = "posts";
-let initialPosts = {};
-if (browser && localStorage.getItem(POSTS_KEY) != null){
-    initialPosts = JSON.parse(localStorage.getItem(POSTS_KEY));
-};
-let postState = $state(initialPosts);
 
-const savePosts = () => {
-    localStorage.setItem(POSTS_KEY, JSON.stringify(postState));
-};
+let postState = $state({});
 
 /*let postState = $state({
   1: [
@@ -22,33 +16,55 @@ const savePosts = () => {
   ],
 });*/
 
+const initPosts = async (communityId) => {
+    if (browser) {
+        const posts = await postsApi.getPosts(communityId);
+        if (posts.error) return;
+        postState[communityId] = posts.data;
+    };
+};
+
+const initPost = async (communityId, postId) => {
+    if (browser) {
+        const post = await postsApi.getPost(communityId, postId);
+        if (post.error) return;
+        if (post.data && !postState[communityId].find((p) => p.id === postId)){
+            postState[communityId].push(post.data);
+        };
+    };
+};
 
 const usePostState = () => {
     return {
         get posts() {
             return postState;
         },
-        getPost: (communityId, postId) => {
-            return postState[communityId].find((p) => p.id === postId);
+        addPost: async (communityId, post) => {
+            post.community_id = communityId;
+            post.parent_post_id = null;
+            console.log("new Post:", post);
+           const newPost = await postsApi.createPost(communityId, post);
+           if (newPost.error){
+            console.error(newPost.error);
+            return;
+           };
+           const posts = postState[communityId] || [];
+           posts.push(newPost);
+           postState[communityId] = posts;
+           
         },
-        addPost: (communityId, title, content) => {
-            if (!postState[communityId]){
-                postState[communityId] = [];
-            };
-            postState[communityId].push({
-                id: postState[communityId].length +1,
-                title: title,
-                content: content
-            });
-            savePosts();
-        },
-        removePost: (communityId, postId) => {
-            console.log("Before remove post:", postState[communityId]);
-            postState[communityId] = postState[communityId].filter((p) => p.id !== postId);
-            console.log("After removing post:", postState[communityId]);
-            savePosts();
+        removePost: async (communityId, postId) => {
+           const deletedPost = await postsApi.deletePost(communityId, postId);
+           if (deletedPost.error){
+            console.error(deletedPost.error);
+            return;
+           };
+           const index = postState[communityId].findIndex((p) => p.id === postId);
+           if (index !== -1){
+            postState[communityId].splice(index, 1);
+           };
         },
     };
 };
 
-export { usePostState };
+export { initPost, initPosts, usePostState };

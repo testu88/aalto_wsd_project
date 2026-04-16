@@ -1,15 +1,8 @@
 import { browser } from "$app/environment";
+import * as communitiesApi from "$lib/apis/communitiesApi.js";
 
-const COMMUNITIES_KEY = "communities";
-let initialCommunities = [];
-if (browser && localStorage.getItem(COMMUNITIES_KEY) != null){
-    initialCommunities = JSON.parse(localStorage.getItem(COMMUNITIES_KEY));
-};
-let communityState = $state(initialCommunities);
 
-const saveCommunities = () => {
-    localStorage.setItem(COMMUNITIES_KEY, JSON.stringify(communityState));
-};
+let communityState = $state([]);
 
 /*let communityState = $state([
   { id: 1, name: 'Developers Hub', description: 'A place for developers' },
@@ -17,24 +10,52 @@ const saveCommunities = () => {
   { id: 3, name: 'Startup Workshop', description: 'Where ideas become reality' }
 ]);*/
 
+const initCommunities = async () => {
+    if (browser) {
+        const communities = await communitiesApi.getCommunities();
+        if (communities.error){
+            return;
+        }
+        communityState = communities.data;
+    };
+};
+
+const initCommunity = async (id) => {
+    if (browser) {
+        const community = await communitiesApi.getCommunity(id);
+        if (community.error) return;
+        if (community.data && !communityState.find((c) => c.id === id)) {
+            communityState.push(community.data);
+        };
+    };
+};
+
 const useCommunityState = () => {
     return {
         get communities(){
             return communityState;
         },
-        getOne: (id) => {
-           return communityState.find((c) => c.id === id);
+        addCommunity: async (community) => {
+            const newCommunity = await communitiesApi.createCommunity(community);
+            if (newCommunity.error){
+                console.error(newCommunity.error);
+                return;
+            };
+            communityState.push(newCommunity.data);
         },
-        addCommunity: (name, description) => {
-            communityState.push({id: communityState.length +1, name: name, description: description});
-            saveCommunities();
-        },
-        removeCommunity: (id) => {
-            communityState = communityState.filter((c) => c.id !== id);
-            saveCommunities();
+        removeCommunity: async (id) => {
+            const deletedCommunity = await communitiesApi.deleteCommunity(id);
+            if (deletedCommunity.error){
+                console.error(deletedCommunity.error);
+                return;
+            };
+            const index = communityState.findIndex((c) => c.id === id);
+            if (index !== -1){
+                communityState.splice(index, 1);
+            };
         }
     };
 };
 
 
-export { useCommunityState };
+export { initCommunities, initCommunity, useCommunityState };
