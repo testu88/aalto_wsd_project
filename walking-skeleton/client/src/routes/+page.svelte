@@ -13,7 +13,7 @@
     })
 </script>
 
-<h1>Todos</h1>
+<h1>Welcome to the home page!</h1>
 
 <ul>
     {#each todos as todo}
