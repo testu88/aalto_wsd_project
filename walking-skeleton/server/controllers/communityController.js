@@ -5,11 +5,13 @@ const create = async (c) => {
     if (!data.name || !data.description){
         return c.json({error: "Missing required fields"}, 400);
     };
-    const newCommunity = await communityRepository.create(data);
+    const user = c.get("user");
+    const newCommunity = await communityRepository.create(user.id, data);
     return c.json(newCommunity, 201);
 };
 
 const readAll = async (c) => {
+    
     const communities = await communityRepository.findAll();
     if (!communities){
         return c.json({error: "Communities not found"}, 404);
@@ -23,6 +25,7 @@ const readAll = async (c) => {
     if (!Number.isInteger(communityId)){
         return c.json({error: "Invalid community id"}, 400);
     };
+    
     const community = await communityRepository.findById(communityId);
     if (!community){
         return c.json({error: "Community not found"}, 404);
@@ -35,7 +38,8 @@ const readAll = async (c) => {
     if (!Number.isInteger(communityId)){
         return c.json({error: "Invalid community id"}, 400);
     };
-    const deletedCommunity = await communityRepository.deleteById(communityId);
+    const user = c.get("user");
+    const deletedCommunity = await communityRepository.deleteById(user.id, communityId);
     if (!deletedCommunity) {
         return c.json({error: "Community not found"}, 404);
     };

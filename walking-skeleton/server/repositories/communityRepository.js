@@ -3,8 +3,8 @@ import postgres from "postgres";
 const sql = postgres();
 
 // Repository Design Pattern
-const create = async (community) => {
-    const result = await sql`INSERT INTO communities (name, description) VALUES (${community.name}, ${community.description}) RETURNING *;`;
+const create = async (userId, community) => {
+    const result = await sql`INSERT INTO communities (created_by, name, description) VALUES (${userId}, ${community.name}, ${community.description}) RETURNING *;`;
     return result[0];
 };
 
@@ -18,8 +18,8 @@ const findById = async (id) => {
     return result[0];
 };
 
-const deleteById = async (id) => {
-    const result = await sql`DELETE FROM communities WHERE id = ${id} RETURNING *;`;
+const deleteById = async (userId, id) => {
+    const result = await sql`DELETE FROM communities WHERE created_by = ${userId} AND id = ${id} RETURNING *;`;
     return result[0];
 };
 

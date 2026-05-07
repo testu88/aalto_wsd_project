@@ -10,7 +10,7 @@ const authenticate = async (c, next) => {
         return c.json({ error: "Missing or invalid authorization header"}, 401);
     };
 
-    // Drop the "Bearer " prefix to get token
+    // Drop the "Bearer " prefix to extract token from header
     const token = authHeader.substring(7);
 
     // Save user object to the context

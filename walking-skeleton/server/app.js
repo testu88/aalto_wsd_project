@@ -5,6 +5,7 @@ import * as communityController from "./controllers/communityController.js";
 import * as postController from "./controllers/postController.js"
 import * as commentController from "./controllers/commentController.js";
 import * as authController from "./controllers/authController.js";
+import * as middlewares from "./middlewares.js";
 
 
 const app = new Hono();
@@ -24,6 +25,7 @@ app.post("/api/auth/login", authController.login);
 // Communities
 app.get("/api/communities",  communityController.readAll);
 app.get("/api/communities/:communityId", communityController.readOne);
+app.use("/api/communities/*", middlewares.authenticate);
 app.post("/api/communities", communityController.create);
 app.delete("/api/communities/:communityId", communityController.deleteById);
 
