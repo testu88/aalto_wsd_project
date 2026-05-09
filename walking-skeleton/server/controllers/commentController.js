@@ -13,7 +13,8 @@ const create = async (c) => {
     if (!data.content){
         return c.json({error: "Missing required fields"}, 400);
     };
-    const newComment = await commentRepository.create(communityId, postId, data);
+    const user = c.get("user");
+    const newComment = await commentRepository.create(user.id, communityId, postId, data);
     return c.json(newComment, 201);
 };
 
@@ -39,7 +40,8 @@ const deleteById = async (c) => {
     if (!Number.isInteger(commentId)){
         return c.json({error: "Invalid comment id"}, 400);
     };
-    const deletedComment = await commentRepository.deleteById(communityId, postId, commentId);
+    const user = c.get("user");
+    const deletedComment = await commentRepository.deleteById(user.id, communityId, postId, commentId);
     if (!deletedComment){
         return c.json({error: "Comment not found"}, 404);
     };

@@ -11,8 +11,8 @@ const create = async (c) => {
 };
 
 const readAll = async (c) => {
-    
     const communities = await communityRepository.findAll();
+   
     if (!communities){
         return c.json({error: "Communities not found"}, 404);
     };
@@ -21,12 +21,13 @@ const readAll = async (c) => {
 
  const readOne = async (c) => {
     const communityId = Number(c.req.param("communityId"));
-    console.log("coummity id:", communityId);
+  
     if (!Number.isInteger(communityId)){
         return c.json({error: "Invalid community id"}, 400);
     };
     
     const community = await communityRepository.findById(communityId);
+
     if (!community){
         return c.json({error: "Community not found"}, 404);
     };

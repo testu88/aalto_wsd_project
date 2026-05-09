@@ -47,7 +47,7 @@ if (!isValid){
 };
 // Get user roles
 //const roles = await authRepository.getUserRoles(foundUser.id);
-const payload = { id: Number(foundUser.id), email: foundUser.email,  exp:Math.floor(Date.now() / 1000) + 60};
+const payload = { id: Number(foundUser.id), email: foundUser.email};  //exp:Math.floor(Date.now() / 1000) + 60};
 const token = await jwt.sign(payload, JWT_SECRET);
 
 // Sent the payload with user id, email, roles in user object

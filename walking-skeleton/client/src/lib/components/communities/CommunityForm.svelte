@@ -1,6 +1,8 @@
 <script>
-    import { useCommunityState } from "$lib/states/communityState.svelte";
+    import { useCommunityState } from "$lib/states/communityState.svelte.js";
+    import { useAuthState } from "$lib/states/authState.svelte.js";
     let communityState = useCommunityState();
+    let authState = useAuthState();
  
     const addCommunity = async (e) => {
         e.preventDefault();
@@ -10,6 +12,7 @@
     };
 </script>
 
+{#if authState.user}
 <form onsubmit={addCommunity}>
 <label>
     Community name:
@@ -23,3 +26,4 @@
 <br />
 <input type="submit" value="Add community" />
 </form>
+{/if}

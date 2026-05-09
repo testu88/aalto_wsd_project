@@ -1,5 +1,7 @@
 import { PUBLIC_API_URL } from "$env/static/public";
 import { myFetch } from "./myFetch.js";
+import { authFetch } from "$lib/utils/fetchUtils.js";
+
 
 const getComments = async (communityId, postId) => {
     const comments = await myFetch(`${PUBLIC_API_URL}/api/communities/${communityId}/posts/${postId}/comments`);
@@ -10,7 +12,7 @@ const getComments = async (communityId, postId) => {
 };
 
 const createComment = async (communityId, postId, comment) => {
-    const newComment = await myFetch(`${PUBLIC_API_URL}/api/communities/${communityId}/posts/${postId}/comments`, {
+    const newComment = await authFetch(`${PUBLIC_API_URL}/api/communities/${communityId}/posts/${postId}/comments`, {
         headers: { "Content-Type":"application/json", },
         method: "POST",
         body: JSON.stringify(comment),
@@ -19,7 +21,7 @@ const createComment = async (communityId, postId, comment) => {
 };
 
 const deleteComment = async (communityId, postId, commentId) => {
-    const deletedComment = await myFetch(`${PUBLIC_API_URL}/api/communities/${communityId}/posts/${postId}/comments/${commentId}`, {
+    const deletedComment = await authFetch(`${PUBLIC_API_URL}/api/communities/${communityId}/posts/${postId}/comments/${commentId}`, {
         method: "DELETE",
     });
     return deletedComment;

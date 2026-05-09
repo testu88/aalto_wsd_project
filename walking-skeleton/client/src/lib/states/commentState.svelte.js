@@ -7,6 +7,7 @@ let commentState = $state({});
 const initComments = async (communityId, postId) => {
     if (browser){
         const comments = await commentsApi.getComments(communityId, postId);
+        console.log("Client comments:", comments);
         if (comments.error){
             return;
         };
@@ -26,7 +27,7 @@ const useCommentState = () => {
             comment.parent_post_id = postId;
             comment.title = null;
             comment.created_on = new Date().toISOString();
-            console.log("new Comment:", comment);
+            
             const newComment = await commentsApi.createComment(communityId, postId, comment);
             if (newComment.error) return ;
             const comments = commentState[postId] || [];

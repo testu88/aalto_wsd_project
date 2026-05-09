@@ -19,6 +19,7 @@ let postState = $state({});
 const initPosts = async (communityId) => {
     if (browser) {
         const posts = await postsApi.getPosts(communityId);
+       
         if (posts.error) return;
         postState[communityId] = posts.data;
     };
@@ -27,7 +28,11 @@ const initPosts = async (communityId) => {
 const initPost = async (communityId, postId) => {
     if (browser) {
         const post = await postsApi.getPost(communityId, postId);
+       
         if (post.error) return;
+        if (!postState[communityId]){
+            postState[communityId] = [];
+        }
         if (post.data && !postState[communityId].find((p) => p.id === postId)){
             postState[communityId].push(post.data);
         };
@@ -42,8 +47,8 @@ const usePostState = () => {
         addPost: async (communityId, post) => {
             post.community_id = communityId;
             post.parent_post_id = null;
-            console.log("new Post:", post);
-           const newPost = await postsApi.createPost(communityId, post);
+           const response = await postsApi.createPost(communityId, post);
+           const newPost = await response.json();
            if (newPost.error){
             console.error(newPost.error);
             return;
@@ -54,7 +59,8 @@ const usePostState = () => {
            
         },
         removePost: async (communityId, postId) => {
-           const deletedPost = await postsApi.deletePost(communityId, postId);
+           const response = await postsApi.deletePost(communityId, postId);
+           const deletedPost = await response.json();
            if (deletedPost.error){
             console.error(deletedPost.error);
             return;

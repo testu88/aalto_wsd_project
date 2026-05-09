@@ -1,8 +1,9 @@
 <script>
     let { communityId } = $props();
-    import { usePostState } from "$lib/states/postState.svelte";
+    import { usePostState } from "$lib/states/postState.svelte.js";
+    import { useAuthState } from "$lib/states/authState.svelte.js";
     let postState = usePostState();
- 
+    let authState = useAuthState();
     const addPost = async (e) => {
         e.preventDefault();
         const newPost = Object.fromEntries(new FormData(e.target));
@@ -11,6 +12,7 @@
     };
 </script>
 
+{#if authState.user}
 <form onsubmit={addPost}>
     <label>
         Post title:
@@ -24,3 +26,4 @@
     <br />
     <input type="submit" value="Add post" />
 </form>
+{/if}

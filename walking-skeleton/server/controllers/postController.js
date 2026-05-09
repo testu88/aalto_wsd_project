@@ -9,7 +9,9 @@ const create = async (c) => {
     if (!data.title || !data.content){
         return c.json({error: "Missing required fields"}, 400);
     };
-    const newPost = await postRepository.create(communityId, data);
+    const user = c.get("user");
+    const newPost = await postRepository.create(user.id, communityId, data);
+   
     return c.json(newPost, 201);
 };
 
@@ -18,8 +20,9 @@ const readAll = async (c) => {
     if (!Number.isInteger(communityId)){
         return c.json({error: "Invalid community id"}, 400);
     };
-    const communities = await postRepository.findAll(communityId);
-    return c.json(communities);
+    const posts = await postRepository.findAll(communityId);
+  
+    return c.json(posts);
 };
 
 const readById = async (c) => {
@@ -47,7 +50,8 @@ const deleteById = async (c) => {
     if (!Number.isInteger(postId)){
         return c.json({error: "Invalid post id"}, 400);
     };
-    const deletedPost = await postRepository.deleteById(communityId, postId);
+    const user = c.get("user");
+    const deletedPost = await postRepository.deleteById(user.id, communityId, postId);
     if (!deletedPost) {
         return c.json({error: "Post not found"}, 404);
     };
